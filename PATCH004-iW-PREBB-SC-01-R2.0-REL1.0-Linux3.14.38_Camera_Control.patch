@@ -1,0 +1,116 @@
+diff -ruN linux-iwg15/drivers/mxc/custom_driver/dip-sw.c linux-iwg15_1/drivers/mxc/custom_driver/dip-sw.c
+--- linux-iwg15/drivers/mxc/custom_driver/dip-sw.c	2020-12-04 17:09:32.065578000 +0530
++++ linux-iwg15_1/drivers/mxc/custom_driver/dip-sw.c	2020-11-13 15:14:06.000000000 +0530
+@@ -40,21 +40,12 @@
+ #include <linux/module.h>
+ #include <linux/io.h>
+ #include <asm/uaccess.h>
+-#include<linux/wait.h>
+-#ifdef CONFIG_IWG15
+-/*IWG15:PollFunction: Including the header file for polling function*/
+-#include<linux/poll.h>
+-#endif
+ #include "dip-sw.h"
+ 
++
+ int num_ctrd;
+ unsigned  *ctrd;
+ 
+-#ifdef CONFIG_IWG15
+-/*IWG15:Dip Switch: Declaring an array to store the dip switch status*/
+-static int stat[4];
+-#endif
+-
+ static int dip_open(struct inode *inode, struct file *file)
+ {
+ 	pr_debug("\r\n Inside: %s",__func__);
+@@ -80,25 +71,6 @@
+ 		case PIN_STATUS:
+ 			status = gpio_get_value(ctrd[arg]);
+ 			break;
+-#ifdef CONFIG_IWG15
+-/*IWG15:Dip Switch: Added the ioctl calls to get the dip switch status*/
+-		case DS1:
+-			status = gpio_get_value(ctrd[PIN1]);
+-			stat[0] = status;
+-			break;
+-		case DS2:
+-                        status = gpio_get_value(ctrd[PIN2]);
+-			stat[1] = status;
+-                        break;
+-		case DS3:
+-                        status = gpio_get_value(ctrd[PIN3]);
+-			stat[2] = status;                        
+-			break;
+-		case DS4:
+-                        status = gpio_get_value(ctrd[PIN4]);
+-			stat[3] = status;
+-                        break;
+-#endif
+ 
+ 		default:
+ 			printk("Unknown ioctl command %x\r\n", cmd);
+@@ -108,37 +80,6 @@
+ 	return status;
+ }
+ 
+-#ifdef CONFIG_IWG15
+-/*IWG15:Dip Switch: Poll function implementation*/
+-unsigned int example_poll(struct file * file, poll_table * pt) 
+-{
+-	unsigned int mask = 0;
+-	int temp;
+-	int status_changed = 0;
+-	
+-	temp = gpio_get_value(ctrd[PIN1]);
+-	if(temp != stat[0])
+-		status_changed =1;
+-
+-	temp = gpio_get_value(ctrd[PIN2]);
+-	if(temp != stat[1])
+-		status_changed =1;
+-
+-	temp = gpio_get_value(ctrd[PIN3]);
+-	if(temp != stat[2])
+-		status_changed =1;
+-
+-	temp = gpio_get_value(ctrd[PIN4]);
+-	if(temp != stat[3])
+-		status_changed =1;
+-
+-	if (status_changed) 
+-	mask |= POLLIN;
+-
+-	return mask;
+-}  
+-#endif
+-
+ static const struct of_device_id of_gpio_dipsw_match[] = {
+ 	{ .compatible = "gpio-dip", },
+ 	{},
+@@ -149,11 +90,6 @@
+ 	.unlocked_ioctl = dip_ioctl,
+ 	.open  = dip_open,
+ 	.release = dip_close,
+-#ifdef CONFIG_IWG15
+-/*IWG15:Dip Switch: Adding the poll function to the fops*/
+-
+-	.poll = example_poll,
+-#endif
+ };
+ 
+ static int gpio_dip_sw_probe(struct platform_device *pdev)
+diff -ruN linux-iwg15/drivers/mxc/custom_driver/dip-sw.h linux-iwg15_1/drivers/mxc/custom_driver/dip-sw.h
+--- linux-iwg15/drivers/mxc/custom_driver/dip-sw.h	2020-12-03 16:28:29.396330000 +0530
++++ linux-iwg15_1/drivers/mxc/custom_driver/dip-sw.h	2020-11-13 15:14:06.000000000 +0530
+@@ -27,10 +27,6 @@
+ 
+ unsigned char dip_sw_major_no;
+ static const char dip_sw_name[] = "dip_sw";
+-#define DS1 23
+-#define DS2 24
+-#define DS3 25
+-#define DS4 26
+ 
+ #define PIN_STATUS	22
+ 
