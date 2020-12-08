@@ -1,5 +1,9 @@
 # cam_control
-This project is about controlling camera using dip switch
+INTODUCTION
+-----------
+
+This project is about controlling camera using dip switch in imx6 SBC board.
+
 The camer aused is ov7725 in imx6 SBC board. 
 In dip switch driver, in ioctl, added the controls to get the status of all the 4 dip switches in the board. Added polling function to get the status change of dip switch whenever user changes the status of the switch.
 test_app.c is the file which contains the application code.
