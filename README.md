@@ -1,4 +1,4 @@
-# cam_control
+# camera control in imx6
 
 INTODUCTION
 -----------
